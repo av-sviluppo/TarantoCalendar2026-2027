@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario eventi</title>
+<style>
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #687386;
+  --border: #e3e8f0;
+  --primary: #1a73e8;
+  --primary-dark: #1558b0;
+  --success: #188038;
+  --shadow: 0 10px 30px rgba(25, 45, 80, .08);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #b40018 0%, #b40018 48%, #001f5b 52%, #001f5b 100%); background-attachment: fixed;
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.container { max-width: 980px; margin: 0 auto; padding: 28px 18px 42px; }
+.hero {
+  background: var(--card); border: 1px solid var(--border); border-radius: 22px;
+  padding: 28px; box-shadow: var(--shadow); margin-bottom: 18px;
+}
+.badge {
+  display:inline-flex; align-items:center; gap:7px; padding:6px 10px;
+  border-radius:999px; background:#e8f0fe; color:var(--primary);
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+}
+h1 { margin:12px 0 6px; font-size:clamp(28px,5vw,40px); line-height:1.1; }
+.intro { margin:0; color:var(--muted); font-size:16px; }
+.toolbar {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--border); border-radius:18px;
+  padding:14px; box-shadow:var(--shadow); margin-bottom:16px;
+}
+button {
+  border:0; border-radius:11px; padding:11px 15px; cursor:pointer;
+  font-size:14px; font-weight:700; transition:.15s ease; 
+}
+button:hover { transform:translateY(-1px); }
+.primary { background:var(--primary); color:white; }
+.primary:hover { background:var(--primary-dark); }
+.secondary { background:#eef2f7; color:#354052; }
+.counter { margin-left:auto; color:var(--muted); font-size:13px; font-weight:600; }
+.eventi { display:grid; gap:10px; }
+.evento {
+  display:flex; gap:14px; align-items:flex-start; background:var(--card);
+  border:1px solid var(--border); border-radius:16px; padding:15px 16px;
+  cursor:pointer; box-shadow:0 3px 12px rgba(25,45,80,.04); transition:.15s ease;
+}
+.evento:hover { border-color:#b9cdf0; box-shadow:var(--shadow); }
+.evento:has(input:checked) { border-color:#9fc0f4; background:#fbfdff; }
+.evento input {
+  flex:0 0 auto; margin:4px 0 0; width:19px; height:19px;
+  accent-color:var(--primary); cursor:pointer;
+}
+.evento strong { display:block; font-size:16px; }
+.meta { color:var(--muted); font-size:13px; margin-top:4px; }
+.desc { margin-top:7px; font-size:14px; color:#3e4858; }
+.date { flex:0 0 auto; min-width:58px; text-align:center; border-radius:12px;
+  background:#f1f5fb; padding:7px 5px; }
+.date .day { display:block; font-size:20px; font-weight:800; line-height:1; }
+.date .month { display:block; margin-top:3px; font-size:10px; font-weight:800; color:var(--primary); text-transform:uppercase; }
+#messaggio {
+  margin-top:16px; padding:12px 14px; border-radius:12px;
+  background:#edf7ee; color:var(--success); font-size:14px; font-weight:600;
+}
+.nota {
+  margin:20px 4px 0; color:var(--muted); font-size:12px; line-height:1.5;
+}
+@media (max-width:620px) {
+  .container { padding:14px 12px 28px; }
+  .hero { padding:22px 18px; border-radius:18px; }
+  .toolbar { border-radius:15px; }
+  .counter { width:100%; margin-left:0; order:5; }
+  .toolbar button { flex:1 1 auto; }
+  .evento { padding:13px; }
+}
+table {
+  border-collapse: separate;
+  border-spacing: 15px; /* Modifica il valore per cambiare lo spazio */
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <section class="hero">
+	<table>
+	<tbody>
+	<tr>
+		<td>
+			<img src="data:image/png;base64,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" alt="SS Taranto Calcio" width="50" height="50" />
+		</td>
+		<td>
+			<span class="badge">📅 Calendario</span>
+			<h1>Eventi</h1>
+			<p class="intro">Seleziona gli appuntamenti che vuoi aggiungere al tuo Google Calendar.</p>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+  </section>
+
+<div class="toolbar">
+  <button class="secondary" onclick="selezionaTutti(true)">Seleziona tutti</button>
+  <button class="secondary" onclick="selezionaTutti(false)">Deseleziona tutti</button>
+  <button class="primary" onclick="aggiungiSelezionati()">➕ Aggiungi a Google Calendar</button>
+  <span class="counter" id="counter"></span>
+</div>
+
+<div id="eventi" class="eventi"></div>
+<div id="messaggio"></div>
+
+<p class="nota">
+  Il file non raccoglie né invia dati personali. Quando aggiungi un evento,
+  si apre Google Calendar con i dati dell'evento già compilati; dovrai premere
+  "Salva" per inserirlo nel tuo calendario.
+</p>
+</div>
+
+<script>
+// ============================================================
+// ELENCO DEGLI EVENTI
+// Modifica SOLO questa sezione per cambiare gli eventi.
+// data       = AAAA-MM-GG
+// oraInizio  = HH:MM
+// oraFine    = HH:MM
+// titolo     = titolo dell'evento
+// descrizione= descrizione (facoltativa)
+// luogo      = luogo (facoltativo)
+// ============================================================
+
+const eventi = [
+  {
+    "data": "2026-09-27",
+    "oraInizio": "15:30",
+    "oraFine": "17:30",
+    "titolo": "TARANTO 2025 SSD ARL - NOVOLI CALCIO 1942",
+    "descrizione": "Giornata 6 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-10-04",
+    "oraInizio": "15:30",
+    "oraFine": "17:30",
+    "titolo": "CANOSA CALCIO 1948 - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 7 - Incontro in trasferta",
+    "luogo": "CAM COMUNALE\"S.SABINO\"ERB-AR* - CANOSA DI PUGLIA"
+  },
+  {
+    "data": "2026-10-11",
+    "oraInizio": "15:30",
+    "oraFine": "17:30",
+    "titolo": "TARANTO 2025 SSD ARL - UGENTO",
+    "descrizione": "Giornata 8 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-10-18",
+    "oraInizio": "15:30",
+    "oraFine": "17:30",
+    "titolo": "BRILLA CAMPI - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 9 - Incontro in trasferta",
+    "luogo": "CAMPO COMUNALE \"R.TREVISI\"E.A - CAMPI SALENTINA"
+  },
+  {
+    "data": "2026-10-25",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - VIGOR TRANI CALCIO",
+    "descrizione": "Giornata 10 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-11-01",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "UNIONE CALCIO - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 11 - Incontro in trasferta",
+    "luogo": "CAMPO COMU.\"G.VENTURA\" E.A * - BISCEGLIE"
+  },
+  {
+    "data": "2026-11-08",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - SQUINZANO CALCIO 1913",
+    "descrizione": "Giornata 12 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-11-15",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "GALATINA CALCIO - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 13 - Incontro in trasferta",
+    "luogo": "STADIO COMUNALE \"G.SPECCHIA\" * - GALATINA"
+  },
+  {
+    "data": "2026-11-22",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - TAURISANO 1939",
+    "descrizione": "Giornata 14 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-11-29",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "OSTUNI CALCIO 24 - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 15 - Incontro in trasferta",
+    "luogo": "CAMPO COMUNALE N.LAVENEZIANA - OSTUNI"
+  },
+  {
+    "data": "2026-12-06",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - ATLETICO ACQUAVIVA",
+    "descrizione": "Giornata 16 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2026-12-13",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "BITONTO CALCIO SSDARL - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 17 - Incontro in trasferta",
+    "luogo": "CAMPO COMU\"CITTÀ DEGLI ULIVI+ - BITONTO"
+  },
+  {
+    "data": "2026-12-20",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "COSMANO SPORT FOGGIA - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 18 - Incontro in trasferta",
+    "luogo": "EX CAMPO FIGC ER.ART.*NO PUBBL - FOGGIA"
+  },
+  {
+    "data": "2027-01-03",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - NUOVA SPINAZZOLA",
+    "descrizione": "Giornata 19 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-01-10",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "TARANTO 2025 SSD ARL - POLIMNIA CALCIO",
+    "descrizione": "Giornata 20 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-01-14",
+    "oraInizio": "14:30",
+    "oraFine": "16:30",
+    "titolo": "ATLETICO RACALE - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 21 - Incontro in trasferta",
+    "luogo": "C.COMUNALE F.BRANDOLINO E.A - MELISSANO"
+  },
+  {
+    "data": "2027-01-17",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "TARANTO 2025 SSD ARL - A. TOMA MAGLIE",
+    "descrizione": "Giornata 22 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-01-24",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "NOVOLI CALCIO 1942 - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 23 - Incontro in trasferta",
+    "luogo": "CAMPO COM \"TOTO CEZZI\" E.A. - NOVOLI"
+  },
+  {
+    "data": "2027-01-31",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "TARANTO 2025 SSD ARL - CANOSA CALCIO 1948",
+    "descrizione": "Giornata 24 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-02-07",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "UGENTO - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 25 - Incontro in trasferta",
+    "luogo": "CAMPO COMUNALE UGENTO ER.ART. - UGENTO"
+  },
+  {
+    "data": "2027-02-14",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "TARANTO 2025 SSD ARL - BRILLA CAMPI",
+    "descrizione": "Giornata 26 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-02-21",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "VIGOR TRANI CALCIO - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 27 - Incontro in trasferta",
+    "luogo": "CAMPO CO. \"N.LAPI\"*DR 06/26 - TRANI"
+  },
+  {
+    "data": "2027-02-28",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "TARANTO 2025 SSD ARL - UNIONE CALCIO",
+    "descrizione": "Giornata 28 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-03-07",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "SQUINZANO CALCIO 1913 - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 29 - Incontro in trasferta",
+    "luogo": "C.COM SQUINZANO E.NAT - SQUINZANO"
+  },
+  {
+    "data": "2027-03-14",
+    "oraInizio": "15:00",
+    "oraFine": "17:00",
+    "titolo": "TARANTO 2025 SSD ARL - GALATINA CALCIO",
+    "descrizione": "Giornata 30 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-04-04",
+    "oraInizio": "16:00",
+    "oraFine": "18:00",
+    "titolo": "TAURISANO 1939 - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 31 - Incontro in trasferta",
+    "luogo": "CAMPO COMUNALE UGENTO ER.ART. - UGENTO"
+  },
+  {
+    "data": "2027-04-11",
+    "oraInizio": "16:00",
+    "oraFine": "18:00",
+    "titolo": "TARANTO 2025 SSD ARL - OSTUNI CALCIO 24",
+    "descrizione": "Giornata 32 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  },
+  {
+    "data": "2027-04-18",
+    "oraInizio": "16:30",
+    "oraFine": "18:30",
+    "titolo": "ATLETICO ACQUAVIVA - TARANTO 2025 SSD ARL",
+    "descrizione": "Giornata 33 - Incontro in trasferta",
+    "luogo": "CAMPO COMUNLE \"GIAMMARIA\"E.A - ACQUAVIVA DELLE FONTI"
+  },
+  {
+    "data": "2027-04-25",
+    "oraInizio": "16:30",
+    "oraFine": "18:30",
+    "titolo": "TARANTO 2025 SSD ARL - BITONTO CALCIO SSDARL",
+    "descrizione": "Giornata 34 - Incontro in casa",
+    "luogo": "Stadio Erasmo Iacovone, Via Erasmo Iacovone, 9, 74121 Taranto TA"
+  }
+];
+
+// ============================================================
+// CODICE DELL'APPLICAZIONE - NON È NECESSARIO MODIFICARLO
+// ============================================================
+
+function escapeHtml(t) {
+  return String(t ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+  }[c]));
+}
+
+function dataIt(data) {
+  const [y,m,d] = data.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function renderEventi() {
+  const contenitore = document.getElementById("eventi");
+
+  if (!eventi.length) {
+    contenitore.innerHTML = "<p>Nessun evento presente.</p>";
+    return;
+  }
+
+  contenitore.innerHTML = eventi.map((e, i) => {
+    const [, mese, giorno] = e.data.split("-");
+    const mesi = ["","gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+    return `
+    <label class="evento">
+      <input type="checkbox" class="evento-check" data-index="${i}" checked onchange="aggiornaContatore()">
+      <span class="date"><span class="day">${giorno}</span><span class="month">${mesi[Number(mese)]}</span></span>
+      <div>
+        <strong>${escapeHtml(e.titolo)}</strong>
+        <div class="meta">
+          ${dataIt(e.data)} · ${escapeHtml(e.oraInizio)}–${escapeHtml(e.oraFine)}
+          ${e.luogo ? " · " + escapeHtml(e.luogo) : ""}
+        </div>
+        ${e.descrizione ? `<div class="desc">${escapeHtml(e.descrizione)}</div>` : ""}
+      </div>
+    </label>`;
+  }).join("");
+  aggiornaContatore();
+}
+
+function selezionaTutti(valore) {
+  document.querySelectorAll(".evento-check").forEach(c => c.checked = valore);
+  aggiornaContatore();
+}
+
+function aggiornaContatore() {
+  const totale = document.querySelectorAll(".evento-check").length;
+  const selezionati = document.querySelectorAll(".evento-check:checked").length;
+  document.getElementById("counter").textContent =
+    `${selezionati} di ${totale} eventi selezionati`;
+}
+
+function formatoGoogle(data, ora) {
+  // Google Calendar URL usa l'ora locale senza fuso:
+  // YYYYMMDDTHHMMSS
+  return data.replaceAll("-", "") + "T" + ora.replace(":", "") + "00";
+}
+
+function creaUrlGoogle(e) {
+  const start = formatoGoogle(e.data, e.oraInizio);
+  const end = formatoGoogle(e.data, e.oraFine);
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: e.titolo,
+    dates: `${start}/${end}`,
+    details: e.descrizione || "",
+    location: e.luogo || ""
+  });
+
+  return "https://calendar.google.com/calendar/render?" + params.toString();
+}
+
+function aggiungiSelezionati() {
+  const selezionati = [...document.querySelectorAll(".evento-check:checked")]
+    .map(c => Number(c.dataset.index));
+
+  const messaggio = document.getElementById("messaggio");
+
+  if (!selezionati.length) {
+    messaggio.textContent = "Seleziona almeno un evento.";
+    return;
+  }
+
+  messaggio.textContent =
+    "Si aprirà una scheda di Google Calendar per ogni evento selezionato. " +
+    "Premi «Salva» in Google Calendar per confermare.";
+
+  // Apriamo gli eventi uno alla volta. I browser possono bloccare più
+  // finestre contemporaneamente; per questo c'è una piccola pausa.
+  selezionati.forEach((indice, posizione) => {
+    setTimeout(() => {
+      window.open(creaUrlGoogle(eventi[indice]), "_blank");
+    }, posizione * 700);
+  });
+}
+
+renderEventi();
+</script>
+
+</body>
+</html>
