@@ -111,7 +111,8 @@ table {
 <div class="toolbar">
   <button class="secondary" onclick="selezionaTutti(true)">Seleziona tutti</button>
   <button class="secondary" onclick="selezionaTutti(false)">Deseleziona tutti</button>
-  <button class="primary" onclick="aggiungiSelezionati()">➕ Aggiungi a Google Calendar</button>
+  <button class="secondary" id="authorize_button" onclick="gestisciAccessoGoogle()" style="display:none">🔐 Accedi con Google</button>
+  <button class="primary" id="add_button" onclick="aggiungiSelezionati()" disabled>➕ Aggiungi a Google Calendar</button>
   <span class="counter" id="counter"></span>
 </div>
 
@@ -119,9 +120,9 @@ table {
 <div id="messaggio"></div>
 
 <p class="nota">
-  Il file non raccoglie né invia dati personali. Quando aggiungi un evento,
-  si apre Google Calendar con i dati dell'evento già compilati; dovrai premere
-  "Salva" per inserirlo nel tuo calendario.
+  Per inserire gli eventi direttamente nel tuo Google Calendar è necessario autorizzare
+  l'accesso al tuo calendario. L'app utilizza l'autorizzazione solo per creare gli eventi
+  selezionati nel tuo calendario principale e non apre una scheda separata per ogni evento.
 </p>
 </div>
 
@@ -373,8 +374,19 @@ const eventi = [
 ];
 
 // ============================================================
-// CODICE DELL'APPLICAZIONE - NON È NECESSARIO MODIFICARLO
+// CONFIGURAZIONE GOOGLE CALENDAR API
 // ============================================================
+const CLIENT_ID = "63794930372-dvs89aqqmrm8tftpgishsth85ca0hpru.apps.googleusercontent.com";
+// Incolla qui la tua API Key di Google Cloud. Non è la chiave OAuth Client ID.
+const API_KEY = "AIzaSyDpekERJa8BdL7BlojiqISOByVFeCTsaYI";
+const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+const SCOPES = "https://www.googleapis.com/auth/calendar.events";
+const TIME_ZONE = "Europe/Rome";
+
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+let autenticato = false;
 
 function escapeHtml(t) {
   return String(t ?? "").replace(/[&<>"']/g, c => ({
@@ -389,12 +401,10 @@ function dataIt(data) {
 
 function renderEventi() {
   const contenitore = document.getElementById("eventi");
-
   if (!eventi.length) {
     contenitore.innerHTML = "<p>Nessun evento presente.</p>";
     return;
   }
-
   contenitore.innerHTML = eventi.map((e, i) => {
     const [, mese, giorno] = e.data.split("-");
     const mesi = ["","gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
@@ -423,57 +433,167 @@ function selezionaTutti(valore) {
 function aggiornaContatore() {
   const totale = document.querySelectorAll(".evento-check").length;
   const selezionati = document.querySelectorAll(".evento-check:checked").length;
-  document.getElementById("counter").textContent =
-    `${selezionati} di ${totale} eventi selezionati`;
+  document.getElementById("counter").textContent = `${selezionati} di ${totale} eventi selezionati`;
 }
 
-function formatoGoogle(data, ora) {
-  // Google Calendar URL usa l'ora locale senza fuso:
-  // YYYYMMDDTHHMMSS
-  return data.replaceAll("-", "") + "T" + ora.replace(":", "") + "00";
+function mostraMessaggio(testo, errore=false) {
+  const el = document.getElementById("messaggio");
+  el.textContent = testo;
+  el.style.background = errore ? "#fdecec" : "#edf7ee";
+  el.style.color = errore ? "#b3261e" : "#188038";
 }
 
-function creaUrlGoogle(e) {
-  const start = formatoGoogle(e.data, e.oraInizio);
-  const end = formatoGoogle(e.data, e.oraFine);
+function gapiLoaded() {
+  gapi.load("client", initializeGapiClient);
+}
 
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: e.titolo,
-    dates: `${start}/${end}`,
-    details: e.descrizione || "",
-    location: e.luogo || ""
+async function initializeGapiClient() {
+  try {
+    if (API_KEY === "INCOLLA_QUI_LA_TUA_API_KEY") {
+      mostraMessaggio("Inserisci la tua API Key di Google Cloud nel file index.html prima di pubblicarlo.", true);
+      return;
+    }
+    await gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: [DISCOVERY_DOC]
+    });
+    gapiInited = true;
+    abilitaApp();
+  } catch (err) {
+    console.error(err);
+    mostraMessaggio("Impossibile inizializzare Google Calendar. Controlla API Key e configurazione Google Cloud.", true);
+  }
+}
+
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: ""
   });
-
-  return "https://calendar.google.com/calendar/render?" + params.toString();
+  gisInited = true;
+  abilitaApp();
 }
 
-function aggiungiSelezionati() {
+function abilitaApp() {
+  if (!gapiInited || !gisInited) return;
+  document.getElementById("authorize_button").style.display = "inline-block";
+  document.getElementById("add_button").disabled = false;
+  aggiornaStatoAccesso();
+}
+
+function aggiornaStatoAccesso() {
+  const authBtn = document.getElementById("authorize_button");
+  if (autenticato || (window.gapi && gapi.client.getToken())) {
+    autenticato = true;
+    authBtn.textContent = "✓ Google autorizzato";
+    authBtn.title = "Accesso già autorizzato. Clicca per riautorizzare.";
+  } else {
+    authBtn.textContent = "🔐 Accedi con Google";
+    authBtn.title = "Autorizza l'app a creare eventi nel tuo calendario";
+  }
+}
+
+function gestisciAccessoGoogle() {
+  if (!tokenClient) {
+    mostraMessaggio("Attendi il caricamento di Google Calendar.", true);
+    return;
+  }
+  tokenClient.callback = (resp) => {
+    if (resp.error !== undefined) {
+      console.error(resp);
+      mostraMessaggio("Autorizzazione Google non riuscita.", true);
+      return;
+    }
+    autenticato = true;
+    aggiornaStatoAccesso();
+    mostraMessaggio("Google Calendar autorizzato. Ora puoi aggiungere gli eventi selezionati.");
+  };
+  tokenClient.requestAccessToken({prompt: gapi.client.getToken() ? "" : "consent"});
+}
+
+function getTokenIfNeeded() {
+  return new Promise((resolve, reject) => {
+    if (gapi.client.getToken()) {
+      autenticato = true;
+      resolve();
+      return;
+    }
+    tokenClient.callback = (resp) => {
+      if (resp.error !== undefined) {
+        console.error(resp);
+        reject(resp);
+        return;
+      }
+      autenticato = true;
+      aggiornaStatoAccesso();
+      resolve();
+    };
+    tokenClient.requestAccessToken({prompt: "consent"});
+  });
+}
+
+function eventoGoogle(e) {
+  return {
+    summary: e.titolo,
+    description: e.descrizione || "",
+    location: e.luogo || "",
+    start: {
+      dateTime: `${e.data}T${e.oraInizio}:00`,
+      timeZone: TIME_ZONE
+    },
+    end: {
+      dateTime: `${e.data}T${e.oraFine}:00`,
+      timeZone: TIME_ZONE
+    }
+  };
+}
+
+async function aggiungiSelezionati() {
   const selezionati = [...document.querySelectorAll(".evento-check:checked")]
     .map(c => Number(c.dataset.index));
-
-  const messaggio = document.getElementById("messaggio");
+  const button = document.getElementById("add_button");
 
   if (!selezionati.length) {
-    messaggio.textContent = "Seleziona almeno un evento.";
+    mostraMessaggio("Seleziona almeno un evento.", true);
+    return;
+  }
+  if (!gapiInited || !gisInited) {
+    mostraMessaggio("Attendi il caricamento di Google Calendar.", true);
     return;
   }
 
-  messaggio.textContent =
-    "Si aprirà una scheda di Google Calendar per ogni evento selezionato. " +
-    "Premi «Salva» in Google Calendar per confermare.";
+  button.disabled = true;
+  button.textContent = "⏳ Inserimento in corso...";
 
-  // Apriamo gli eventi uno alla volta. I browser possono bloccare più
-  // finestre contemporaneamente; per questo c'è una piccola pausa.
-  selezionati.forEach((indice, posizione) => {
-    setTimeout(() => {
-      window.open(creaUrlGoogle(eventi[indice]), "_blank");
-    }, posizione * 700);
-  });
+  try {
+    await getTokenIfNeeded();
+    let inseriti = 0;
+    for (const indice of selezionati) {
+      await gapi.client.calendar.events.insert({
+        calendarId: "primary",
+        resource: eventoGoogle(eventi[indice])
+      });
+      inseriti++;
+    }
+    mostraMessaggio(`${inseriti} ${inseriti === 1 ? "evento inserito" : "eventi inseriti"} direttamente nel tuo Google Calendar.`);
+  } catch (err) {
+    console.error("Google Calendar API:", err);
+    let dettaglio = "Controlla l'autorizzazione Google e la configurazione dell'app.";
+    if (err?.result?.error?.message) dettaglio = err.result.error.message;
+    else if (err?.error_description) dettaglio = err.error_description;
+    mostraMessaggio(`Errore durante l'inserimento: ${dettaglio}`, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "➕ Aggiungi a Google Calendar";
+    aggiornaStatoAccesso();
+  }
 }
 
 renderEventi();
 </script>
 
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
