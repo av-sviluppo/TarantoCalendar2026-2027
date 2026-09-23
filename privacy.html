@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informativa sulla Privacy - Calendario Taranto 2025 SSD ARL</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5e6c84;
+      --border: #e3e8f0;
+      --primary: #1a73e8;
+      --primary-dark: #1558b0;
+      --taranto-red: #b40018;
+      --taranto-blue: #001f5b;
+      --shadow: 0 10px 30px rgba(25, 45, 80, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, var(--taranto-red) 0%, var(--taranto-red) 48%, var(--taranto-blue) 52%, var(--taranto-blue) 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 860px;
+      margin: 36px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e8f0fe;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(24px, 4vw, 32px);
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+    .date-info {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+    h2 {
+      font-size: 19px;
+      margin-top: 28px;
+      margin-bottom: 10px;
+      color: var(--taranto-blue);
+      border-bottom: 2px solid #eef2f7;
+      padding-bottom: 6px;
+    }
+    p, li {
+      font-size: 15px;
+      color: #354052;
+    }
+    ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    .highlight-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      margin: 18px 0;
+    }
+    .highlight-box strong {
+      color: var(--primary-dark);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .google-compliance {
+      background: #eef5ff;
+      border: 1px solid #c9defa;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .footer-nav {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+    }
+    .footer-nav a {
+      color: white;
+      margin: 0 10px;
+      opacity: 0.9;
+    }
+    .footer-nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <span class="header-badge">Informativa Legale</span>
+      <h1>Norme sulla Privacy (Privacy Policy)</h1>
+      <div class="date-info">Ultimo aggiornamento: 24 Settembre 2026</div>
+
+      <p>
+        La presente Informativa sulla Privacy descrive come l'applicazione web <strong>Calendario Taranto 2025 SSD ARL</strong>
+        gestisce le informazioni e i dati personali durante l'utilizzo del servizio e in particolare nell'interazione
+        con le API di Google Calendar.
+      </p>
+
+      <h2>1. Titolare del Trattamento e Natura dell'Applicazione</h2>
+      <p>
+        L'applicazione è uno strumento web gratuito ad uso informativo e personale progettato per consentire ai tifosi
+        e appassionati di salvare il calendario degli incontri sportivi della squadra <strong>TARANTO 2025 SSD ARL</strong>
+        direttamente sul proprio account Google Calendar.
+      </p>
+      <p>
+        L'applicazione è un'applicazione web lato client (Single Page Application statica) che viene eseguita
+        esclusivamente nel browser web dell'utente.
+      </p>
+
+      <h2>2. Dati Raccolti e Trattamento</h2>
+      <div class="highlight-box">
+        <strong>Nessuna archiviazione o salvataggio su server</strong>
+        L'applicazione non dispone di un database proprietario né di server di backend che registrano o conservano i dati personali,
+        le credenziali dell'utente o le informazioni relative al suo account Google.
+      </div>
+      <p>Durante l'utilizzo vengono trattati unicamente:</p>
+      <ul>
+        <li>
+          <strong>Token di autenticazione OAuth 2.0 temporaneo</strong>: rilasciato da Google dopo l'autorizzazione esplicita
+          dell'utente mediante la finestra ufficiale di accesso Google Identity Services. Tale token risiede unicamente
+          nella memoria volatile del browser e viene impiegato per effettuare le chiamate dirette dal browser verso le API di Google.
+        </li>
+        <li>
+          <strong>Eventi selezionati</strong>: l'elenco degli incontri sportivi (data, orario, titolo, luogo) che l'utente ha scelto
+          di inserire nel proprio calendario.
+        </li>
+      </ul>
+
+      <h2>3. Utilizzo dei Dati e Ambito di Google Calendar (Scope)</h2>
+      <p>
+        L'applicazione richiede l'autorizzazione per il seguente ambito (OAuth Scope):
+      </p>
+      <div class="highlight-box">
+        <code>https://www.googleapis.com/auth/calendar.events</code>
+      </div>
+      <p>Questo ambito viene utilizzato <strong>esclusivamente</strong> per:</p>
+      <ul>
+        <li>
+          Creare e inserire i nuovi eventi delle partite selezionate all'interno del calendario principale (<code>primary</code>)
+          dell'utente tramite la funzione standard <code>calendar.events.insert</code> delle Google Calendar API.
+        </li>
+      </ul>
+      <p>L'applicazione <strong>NON</strong> esegue le seguenti operazioni:</p>
+      <ul>
+        <li>Non legge, non consulta e non scarica gli altri eventi o impegni già presenti nel calendario dell'utente.</li>
+        <li>Non modifica né cancella eventi esistenti non generati dalla sessione corrente.</li>
+        <li>Non condivide, non trasmette e non vende alcun dato a terzi né per finalità pubblicitarie o di profilazione.</li>
+      </ul>
+
+      <h2>4. Conformità alle Norme sui Dati Utente di Google (Limited Use)</h2>
+      <div class="google-compliance">
+        <strong>Dichiarazione di conformità Google API Services User Data Policy:</strong><br>
+        L'uso e il trasferimento ad altre app delle informazioni ricevute dalle API di Google da parte di questa applicazione
+        sono conformi alle <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Norme sui dati degli utenti dei servizi API di Google</a>, inclusi i requisiti per l'<strong>Utilizzo Limitato (Limited Use Requirements)</strong>.
+      </div>
+
+      <h2>5. Revoca dell'Autorizzazione e Cancellazione dei Dati</h2>
+      <p>
+        Poiché l'applicazione non conserva dati sui propri server, la chiusura della finestra del browser elimina il token
+        dalla memoria.
+      </p>
+      <p>
+        L'utente può revocare l'accesso concesso all'applicazione in qualsiasi momento con effetto immediato direttamente
+        dalle impostazioni di sicurezza del proprio account Google:
+      </p>
+      <ol>
+        <li>Accedi alla pagina <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Permessi e App collegate del tuo Account Google</a>.</li>
+        <li>Individua l'applicazione <strong>Calendario Taranto 2025 SSD ARL</strong> (o il relativo ID progetto OAuth).</li>
+        <li>Seleziona <strong>"Rimuovi accesso"</strong>.</li>
+      </ol>
+
+      <h2>6. Cookie e Tracciamento</h2>
+      <p>
+        L'applicazione non utilizza cookie di profilazione, cookie di terze parti né strumenti di tracciamento pubblicitario.
+        Gli script esterni caricati (<code>apis.google.com</code> e <code>accounts.google.com/gsi/client</code>) sono
+        forniti direttamente da Google LLC per consentire l'autenticazione sicura dell'utente.
+      </p>
+
+      <h2>7. Contatti e Supporto</h2>
+      <p>
+        Per qualsiasi domanda, chiarimento o richiesta di supporto in merito all'applicazione e al trattamento dei dati,
+        è possibile contattare il gestore del progetto all'indirizzo email di riferimento registrato nella Google Cloud Console
+        nella schermata di consenso OAuth dell'applicazione.
+      </p>
+    </div>
+
+    <div class="footer-nav">
+      <a href="index.html">← Torna al Calendario</a>
+      <span>•</span>
+      <a href="terms.html">Termini di Servizio</a>
+    </div>
+  </div>
+</body>
+</html>
